@@ -49,17 +49,20 @@ let bigJump={
   y:0.9
 }
 
-//let shrink={
-  //color:[360]
+let shrink={
+  color:[360,100,50,1],
+  size:[200,200],
+  roundedness:0,
+  y:0.5
 
-//}
+}
 
 //player location and state
 let x=0.1;
 let y= 0.75;
 let movingUp= false;
 let jumpHeight=0;
-
+let gameOver= false;
 
 
 let obstacles=[
@@ -82,6 +85,7 @@ function obstaclesAppear(){
   let typeObject;
   if(typeSort==="smallJump") typeObject= smallJump;
   else if(typeSort==="bigJump") typeObject=bigJump;
+  else if(typeSort==="shrink") typeObject=shrink;
   
 
   const obstacle= Util.createThing("obstacle");
@@ -98,17 +102,40 @@ function obstaclesAppear(){
     y:typeObject.y,
     width: typeObject.size[0],
     height: typeObject.size[1],
-    speed:0.009
+    speed:0.005
   })
 }
 
 function collide
 (playerX, playerY, playerWidth, playerHeight,obstacle){
-  let playerRightEdge= playerX+playerWidth;
-  if(obstacle.x<=playerRightEdge){
-    return true;
+  //the player edges
+  const playerLeftEdge= playerX;
+  const playerRightEdge= playerX+playerWidth;
+  const playerTopEdge=playerY;
+  const playerBottomEdge= playerY+playerHeight;
+
+  //obstacle edges
+
+  const obstacleLeftEdge=obstacle.x;
+  const obstacleRightEdge=obstacle.x+(obstacle.width/window.innerWidth);
+  const obstacleTopEdge=obstacle.y;
+  const obstacleBottomEdge=obstacle.y+(obstacle.height/window.innerHeight);
+
+  const overlapX=
+  playerRightEdge>obstacleLeftEdge && playerLeftEdge<obstacleRightEdge;
+  const overlapY=
+  playerBottomEdge>obstacleTopEdge && playerTopEdge<obstacleBottomEdge;
+
+  if(overlapX && overlapY)
+    {
+    return true; 
+  } else{
+    return false;
+
   }
-  return false;
+  
+  
+
 }
 
 document.addEventListener("keydown", (event)=>{
@@ -147,6 +174,7 @@ document.addEventListener("keyup", (event)=>{
 )
   
 function loop() {
+  if (gameOver) return
   //player movement
   if(movingUp&& y>0.75 - jumpHeight){
     y-=speed
@@ -171,12 +199,14 @@ function loop() {
   const objectHeight=obstacle.height/window.innerHeight ;
 
   if (collide (playerX, playerY, playerWidth, playerHeight, obstacle)){
-    break
+    console.log("Game over")
+    gameOver=true;
+    
+    return;
+    
     //window.alert("game over")
     
   }
-
-  
 
   }
 
