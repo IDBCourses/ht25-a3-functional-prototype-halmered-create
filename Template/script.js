@@ -28,23 +28,31 @@ const shrinkSize= size*shrinkFactor
 const offsetPixels= size-shrinkSize
 const offsetNormalized=offsetPixels/window.innerHeight
 const obstacleTypes=["smallJump","bigJump","shrink" ];
+//smallJump.style.zIndex="1"
+//bigJump.style.zIndex="2"
+player.style.zIndex="3"
+
+
 //const obstacle= Util.createThing("obstacle")
+
 let smallJump={
 color:[360,100,50,1],
 size:[60,60],
-roundedness:[0],
-y:[0.8]}
+roundedness:0,
+y:0.9
+}
 
 let bigJump={
   color:[360,100,50,1],
   size:[150,70],
-  roundedness:[0]
+  roundedness:0,
+  y:0.9
 }
 
-let shrink={
-  color:[]
+//let shrink={
+  //color:[360]
 
-}
+//}
 
 //player location and state
 let x=0.1;
@@ -54,7 +62,9 @@ let jumpHeight=0;
 
 
 
-let obstacles=[]
+let obstacles=[
+
+]
 
 
 
@@ -63,6 +73,42 @@ function initPlayer() {
 Util.setPosition(x,y,player)
 Util.setColour(120,100,50,1, player)
 Util.setSize(size,size, player)
+Util.setRoundedness(0.2, player)
+}
+
+function obstaclesAppear(){
+  const typeSort= obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)];
+
+  let typeObject;
+  if(typeSort==="smallJump") typeObject= smallJump;
+  else if(typeSort==="bigJump") typeObject=bigJump;
+  
+
+  const obstacle= Util.createThing("obstacle");
+  let x=1;
+  Util.setPosition(x, typeObject.y, obstacle)
+  Util.setColour(typeObject.color[0], typeObject.color[1],typeObject.color[2],
+    typeObject.color[3], obstacle);
+  Util.setSize(typeObject.size[0], typeObject.size[1], obstacle)
+  Util.setRoundedness(typeObject.roundedness, obstacle)
+
+  obstacles.push({
+    thing:obstacle,
+    x:x,
+    y:typeObject.y,
+    width: typeObject.size[0],
+    height: typeObject.size[1],
+    speed:0.009
+  })
+}
+
+function collide
+(playerX, playerY, playerWidth, playerHeight,obstacle){
+  let playerRightEdge= playerX+playerWidth;
+  if(obstacle.x<=playerRightEdge){
+    return true;
+  }
+  return false;
 }
 
 document.addEventListener("keydown", (event)=>{
@@ -101,12 +147,42 @@ document.addEventListener("keyup", (event)=>{
 )
   
 function loop() {
+  //player movement
   if(movingUp&& y>0.75 - jumpHeight){
     y-=speed
   } else if (!movingUp && y< 0.75){
     y+=speed
   }
   Util.setPosition(x,y, player);
+
+
+  //obstacles movement
+  for(let i=0; i<obstacles.length; i++){
+    let obstacle=obstacles[i]
+    obstacle.x-= obstacle.speed;
+    Util.setPosition(obstacle.x, obstacle.y, obstacle.thing);
+  
+  //collision
+  const playerX=x;
+  const playerY=y;
+  const playerWidth= size/window.innerWidth;
+  const playerHeight= size/window.innerHeight;
+  const objectWidth= obstacle.width/window.innerWidth;
+  const objectHeight=obstacle.height/window.innerHeight ;
+
+  if (collide (playerX, playerY, playerWidth, playerHeight, obstacle)){
+    break
+    //window.alert("game over")
+    
+  }
+
+  
+
+  }
+
+
+
+
   
   window.requestAnimationFrame(loop);
 }
@@ -115,6 +191,8 @@ function loop() {
 // Setup is run once, at the start of the program. It sets everything up for us!
 function setup() {
  initPlayer()
+ obstaclesAppear()
+ setInterval(obstaclesAppear, 2000);
 
   
   // Put your event listener code here
