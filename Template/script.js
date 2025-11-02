@@ -22,12 +22,13 @@ const allVowels =
 const consonants=["B","b","C","c","D","d","F","f","G","g","H","h","J",
   "j", "K","k", "L","l","M","m","N","n","P","p","Q","q","R","r","S","s","T",
   "t","V","v","W","w","X","x","Z","z"]
-const speed=0.07
-const shrinkFactor= 0.7
-const shrinkSize= size*shrinkFactor
-const offsetPixels= size-shrinkSize
-const offsetNormalized=offsetPixels/window.innerHeight
+const speed=0.07;
+const shrinkFactor= 0.7;
+const shrinkSize= size*shrinkFactor;
+const offsetPixels= size-shrinkSize;
+const offsetNormalized=offsetPixels/window.innerHeight;
 const obstacleTypes=["smallJump","bigJump","shrink" ];
+const jumpTime=350;
 //smallJump.style.zIndex="1"
 //bigJump.style.zIndex="2"
 player.style.zIndex="3"
@@ -63,6 +64,7 @@ let y= 0.75;
 let movingUp= false;
 let jumpHeight=0;
 let gameOver= false;
+let timerJump=0
 
 
 let obstacles=[
@@ -138,6 +140,16 @@ function collide
 
 }
 
+function gameOverText(){
+  const text= document.createElement("div");
+  text.innerText="GAME OVER"
+  text.style.fontSize="100px"
+  text.style.position="fixed"
+  text.style.top="30%"
+  text.style.left="30%"
+  document.body.appendChild(text)
+}
+
 document.addEventListener("keydown", (event)=>{
   if(lowerVowels.includes(event.key)){
     movingUp=true;
@@ -201,7 +213,7 @@ function loop() {
   if (collide (playerX, playerY, playerWidth, playerHeight, obstacle)){
     console.log("Game over")
     gameOver=true;
-    
+    gameOverText()
     return;
     
     //window.alert("game over")
@@ -223,6 +235,7 @@ function setup() {
  initPlayer()
  obstaclesAppear()
  setInterval(obstaclesAppear, 2000);
+ 
 
   
   // Put your event listener code here
