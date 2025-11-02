@@ -13,6 +13,8 @@ import * as Util from "./util.js";
 
 // Code that runs over and over again
 
+//const list
+
 const player= Util.createThing("player");
 const size= 150;
 const lowerVowels = ["a", "e", "i", "o", "u", "y", "å", "ä", "ö"];
@@ -22,19 +24,20 @@ const allVowels =
 const consonants=["B","b","C","c","D","d","F","f","G","g","H","h","J",
   "j", "K","k", "L","l","M","m","N","n","P","p","Q","q","R","r","S","s","T",
   "t","V","v","W","w","X","x","Z","z"]
-const speed=0.07;
+const speed=0.01;
 const shrinkFactor= 0.7;
 const shrinkSize= size*shrinkFactor;
 const offsetPixels= size-shrinkSize;
 const offsetNormalized=offsetPixels/window.innerHeight;
 const obstacleTypes=["smallJump","bigJump","shrink" ];
-const jumpTime=350;
+const jumpTimeMax=550;
+const shrinkTimeMax=950;
 //smallJump.style.zIndex="1"
 //bigJump.style.zIndex="2"
 player.style.zIndex="3"
 
 
-//const obstacle= Util.createThing("obstacle")
+
 
 let smallJump={
 color:[360,100,50,1],
@@ -45,9 +48,9 @@ y:0.9
 
 let bigJump={
   color:[360,100,50,1],
-  size:[150,70],
+  size:[150,150],
   roundedness:0,
-  y:0.9
+  y:0.75
 }
 
 let shrink={
@@ -58,13 +61,14 @@ let shrink={
 
 }
 
-//player location and state
+//let list
 let x=0.1;
 let y= 0.75;
 let movingUp= false;
 let jumpHeight=0;
 let gameOver= false;
-let timerJump=0
+let jumpTimer=0
+let shrinkTimer=0
 
 
 let obstacles=[
@@ -135,9 +139,6 @@ function collide
     return false;
 
   }
-  
-  
-
 }
 
 function gameOverText(){
@@ -152,15 +153,28 @@ function gameOverText(){
 
 document.addEventListener("keydown", (event)=>{
   if(lowerVowels.includes(event.key)){
-    movingUp=true;
-    jumpHeight=0.2;}
+    if(!movingUp && !jumpTimer){
+      movingUp=true;
+      jumpHeight=0.4;
+      
+      jumpTimer= setTimeout(()=>{
+      movingUp=false;
+      jumpTimer=0;
+    }, jumpTimeMax );
+  }
+}
     else if (capitalVowels.includes(event.key)) {
-    movingUp=true;
-    jumpHeight=0.4;}
-
+      if(!movingUp && !jumpTimer){
+     movingUp=true;
+     jumpHeight=0.6;
     
+    jumpTimer= setTimeout(()=>{
+      movingUp=false;
+      jumpTimer=0;},
+      jumpTimeMax);
+    }
+  }
 })
-
 
 document.addEventListener("keyup", (event)=>{
   if(allVowels.includes(event.key))
@@ -170,12 +184,21 @@ document.addEventListener("keyup", (event)=>{
 
 document.addEventListener("keydown",(event)=>{
 if(consonants.includes(event.key)){
-  Util.setSize(size*shrinkFactor,size*shrinkFactor, player)
-  movingUp=false;
-  y+=offsetNormalized;
+  if(!shrinkTimer){
+    Util.setSize(size*shrinkFactor,size*shrinkFactor, player)
+   movingUp=false;
+   y+=offsetNormalized;
+   Util.setPosition(x,y, player);
 
-}
-})
+   shrinkTimer=setTimeout(()=>{
+    Util.setSize(size,size,player)
+    y-=offsetNormalized
+    Util.setPosition(x,y,player);
+    shrinkTimer=0;
+   },shrinkTimeMax);
+  }
+ }
+});
 
 document.addEventListener("keyup", (event)=>{
   if(consonants.includes(event.key)){
@@ -221,11 +244,6 @@ function loop() {
   }
 
   }
-
-
-
-
-  
   window.requestAnimationFrame(loop);
 }
 
@@ -236,8 +254,6 @@ function setup() {
  obstaclesAppear()
  setInterval(obstaclesAppear, 2000);
  
-
-  
   // Put your event listener code here
 
   window.requestAnimationFrame(loop);
