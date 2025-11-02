@@ -29,9 +29,9 @@ const shrinkFactor= 0.7;
 const shrinkSize= size*shrinkFactor;
 const offsetPixels= size-shrinkSize;
 const offsetNormalized=offsetPixels/window.innerHeight;
-const obstacleTypes=["smallJump","bigJump","shrink" ];
+const obstacleTypes=["smallJump","bigJump", "shrink"];
 const jumpTimeMax=550;
-const shrinkTimeMax=950;
+const shrinkTimeMax=1000;
 //smallJump.style.zIndex="1"
 //bigJump.style.zIndex="2"
 player.style.zIndex="3"
@@ -41,21 +41,21 @@ player.style.zIndex="3"
 
 let smallJump={
 color:[360,100,50,1],
-size:[60,60],
+size:[60,90],
 roundedness:0,
-y:0.9
+y:0.85
 }
 
 let bigJump={
   color:[360,100,50,1],
-  size:[150,150],
+  size:[110,160],
   roundedness:0,
-  y:0.75
+  y:0.73
 }
 
 let shrink={
   color:[360,100,50,1],
-  size:[200,200],
+  size:[200,185],
   roundedness:0,
   y:0.5
 
@@ -155,7 +155,7 @@ document.addEventListener("keydown", (event)=>{
   if(lowerVowels.includes(event.key)){
     if(!movingUp && !jumpTimer){
       movingUp=true;
-      jumpHeight=0.4;
+      jumpHeight=0.15;
       
       jumpTimer= setTimeout(()=>{
       movingUp=false;
@@ -166,7 +166,7 @@ document.addEventListener("keydown", (event)=>{
     else if (capitalVowels.includes(event.key)) {
       if(!movingUp && !jumpTimer){
      movingUp=true;
-     jumpHeight=0.6;
+     jumpHeight=0.4;
     
     jumpTimer= setTimeout(()=>{
       movingUp=false;
@@ -183,6 +183,7 @@ document.addEventListener("keyup", (event)=>{
 })
 
 document.addEventListener("keydown",(event)=>{
+  if(event.repeat)return;
 if(consonants.includes(event.key)){
   if(!shrinkTimer){
     Util.setSize(size*shrinkFactor,size*shrinkFactor, player)
@@ -252,7 +253,7 @@ function loop() {
 function setup() {
  initPlayer()
  obstaclesAppear()
- setInterval(obstaclesAppear, 2000);
+ setInterval(obstaclesAppear, 2500);
  
   // Put your event listener code here
 
