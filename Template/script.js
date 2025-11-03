@@ -32,11 +32,10 @@ const offsetNormalized=offsetPixels/window.innerHeight;
 const obstacleTypes=["smallJump","bigJump", "shrink"];
 const jumpTimeMax=550;
 const shrinkTimeMax=1000;
+const winningTime=25000
 //smallJump.style.zIndex="1"
 //bigJump.style.zIndex="2"
 player.style.zIndex="3"
-
-
 
 
 let smallJump={
@@ -70,12 +69,9 @@ let gameOver= false;
 let jumpTimer=0
 let shrinkTimer=0
 
-
+//obstacles array
 let obstacles=[
-
 ]
-
-
 
 
 function initPlayer() {
@@ -151,6 +147,17 @@ function gameOverText(){
   document.body.appendChild(text)
 }
 
+function finishedGameText(){
+  const text= document.createElement("div");
+  text.innerText="Complete"
+  text.style.fontSize="100px"
+  text.style.position="fixed"
+  text.style.top="30%"
+  text.style.left="30%"
+  document.body.appendChild(text)
+
+}
+
 document.addEventListener("keydown", (event)=>{
   if(lowerVowels.includes(event.key)){
     if(!movingUp && !jumpTimer){
@@ -206,8 +213,7 @@ document.addEventListener("keyup", (event)=>{
     Util.setSize(size,size, player)
     y-=offsetNormalized;
   }
-}
-)
+})
   
 function loop() {
   if (gameOver) return
@@ -234,6 +240,8 @@ function loop() {
   const objectWidth= obstacle.width/window.innerWidth;
   const objectHeight=obstacle.height/window.innerHeight ;
 
+  //winning create timeing function?
+  
   if (collide (playerX, playerY, playerWidth, playerHeight, obstacle)){
     console.log("Game over")
     gameOver=true;
