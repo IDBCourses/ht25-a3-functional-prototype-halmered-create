@@ -3,13 +3,17 @@
  *
  */
 
+
+//Instructions, you play as the green square and have to 
+// jump over or crouch under the red objects coming from the right side of the window.
+//To jump press and release a vowel key, a quick press results in a low jump
+//and a longer press (longer that 0.2 seconds) results in a high jump, 
+// the jump starts after the key is released.
+//To shrink the player press any consonant key, but keep in mind that
+// the shrinking has a time limit of 1 second.
+
 import * as Util from "./util.js";
 
-// State variables are the parts of your program that change over time.
-
-// Settings variables should contain all of the "fixed" parts of your programs
-
-// Code that runs over and over again
 
 //const list
 const player= Util.createThing("player");
@@ -24,13 +28,16 @@ const offsetPixels= size-shrinkSize;
 const offsetNormalized=offsetPixels/window.innerHeight;
 const obstacleTypes=["smallJump","bigJump", "shrink"];
 const shrinkTimeMax=1000;
+const groundY= 0.75
+const vowelPressTime=200
+const jumpPeakStay=800
 
 player.style.zIndex="3"
 
-//template for obstacles
+//outline for my obstacles
 const smallJump={
  color:[360,100,50,1],
-size:[60,90],
+ size:[60,90],
  roundedness:0,
  y:0.85
 }
@@ -73,6 +80,7 @@ Util.setRoundedness(0.2, player)
 }
 
 function obstaclesAppear(){
+  //selects random obstacle type to move onto screen
   const typeSort= obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)];
 
   let typeObject;
@@ -112,7 +120,8 @@ function collide
   const obstacleRightEdge=obstacle.x+(obstacle.width/window.innerWidth);
   const obstacleTopEdge=obstacle.y;
   const obstacleBottomEdge=obstacle.y+(obstacle.height/window.innerHeight);
-
+  
+  //overlap on X and Y axes
   const overlapX=
   playerRightEdge>obstacleLeftEdge && playerLeftEdge<obstacleRightEdge;
   const overlapY=
@@ -137,22 +146,10 @@ function gameOverText(){
   document.body.appendChild(text)
 }
 
-function finishedGameText(){
-  const text= document.createElement("div");
-  text.innerText="Complete"
-  text.style.fontSize="100px"
-  text.style.position="fixed"
-  text.style.top="30%"
-  text.style.left="30%"
-  document.body.appendChild(text)
-}
-
 document.addEventListener("keydown", (event)=>{
   if(lowerVowels.includes(event.key)&& !isJumping){
     if(jumpPressStart===null){
-     
-      jumpPressStart= Date.now()
-      
+      jumpPressStart= Date.now() //When vowelkey is pressed
     } 
   }
 })
@@ -161,7 +158,8 @@ document.addEventListener("keyup", (event)=>{
   if(lowerVowels.includes(event.key)){
     if(jumpPressStart !== null && !isJumping){
       const pressDuration= Date.now()-jumpPressStart
-      if(pressDuration < 200){
+      //determines if player makes low or high jump
+      if(pressDuration < vowelPressTime){
         jumpHeight= 0.15
       } else {
         jumpHeight=0.4
@@ -177,10 +175,12 @@ document.addEventListener("keydown",(event)=>{
   if(event.repeat)return;
 if(consonants.includes(event.key)){
   if(!shrinkTimer){
+    //shrink player
     Util.setSize(size*shrinkFactor,size*shrinkFactor, player)
     movingUp=false;
     y+=offsetNormalized;
     Util.setPosition(x,y, player);
+    //timer restore to original size 
     shrinkTimer=setTimeout(()=>{
     Util.setSize(size,size,player)
     y-=offsetNormalized
@@ -200,9 +200,9 @@ document.addEventListener("keyup", (event)=>{
   
 function loop() {
   if (gameOver) return
-  const groundY= 0.75
+  
   const jumpTargetY=groundY-jumpHeight
-
+  //jump, stay in air, down
   if (movingUp){
     if(y>jumpTargetY){
       y-=speed;
@@ -214,7 +214,7 @@ function loop() {
         peakHoldTimer=setTimeout(()=>{
           peakHold=false;
           peakHoldTimer=null;
-        },800);
+        },jumpPeakStay);
 
       }
     }
@@ -240,7 +240,7 @@ function loop() {
 
   Util.setPosition(x,y, player);
 
-  //obstacles movement
+  //obstacles movement and collision check
   for(let i=0; i<obstacles.length; i++){
     let obstacle=obstacles[i]
     obstacle.x-= obstacle.speed;
@@ -260,16 +260,13 @@ function loop() {
   }
  } window.requestAnimationFrame(loop);
 }
-// Setup is run once, at the start of the program. It sets everything up for us!
+
 function setup() {
  initPlayer()
  obstaclesAppear()
- setInterval(obstaclesAppear, 2500);
- 
-  // Put your event listener code here
-
-  window.requestAnimationFrame(loop);
+ setInterval(obstaclesAppear, 2500); //makes objects appear regularly (every 2,5 sec)
+window.requestAnimationFrame(loop);
 }
-setup(); // Always remember to call setup()!
+setup(); 
 
  document.body.removeChild(Util.thing)
